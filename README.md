@@ -1,4 +1,4 @@
-See CheckoutPrice repositoty unit tests written for.
+See CheckoutPrice repository unit tests written for.
 
 Checkout both repos to the same folder:
 Directory
