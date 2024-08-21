@@ -19,8 +19,15 @@ namespace Tests
                 {"D", 15}
             };
 
+            var specialPrices = new Dictionary<string, SpecialPriceProvider>
+            {
+                {"A", new SpecialPriceProvider(3, 130)},
+                {"B", new SpecialPriceProvider(2, 45)}
+            };
+
             IPriceProvider priceProvider = new PriceProvider(itemPrices);
-            _checkout = new Checkout(priceProvider);
+            ISpecialPriceManager specialPriceManager = new SpecialPriceManager(specialPrices);
+            _checkout = new Checkout(priceProvider, specialPriceManager);
         }
 
 
@@ -48,7 +55,6 @@ namespace Tests
         [DataRow(new[] { "A", "A" }, 100)]
         [DataRow(new[] { "A", "B", "C" }, 100)]
         [DataRow(new[] { "C", "A", "B" }, 100)]
-        [DataRow(new[] { "A", "A", "A", "B", "B", "D" }, 225)]
         public void ScanMultiItems_WithoutSpecialOffer_ExpectNormalPriceTotal(string[] items, int expectedTotal)
         {
             foreach (var item in items)
@@ -61,10 +67,30 @@ namespace Tests
 
 
 
+        [TestMethod()]
+        [DataRow(new[] { "A", "A", "A" }, 130)]
+        [DataRow(new[] { "B", "B" }, 45)]
+        public void ScanMultiItems_WithSpecialOffers_ExpectDiscountedTotal(string[] items, int expectedTotal)
+        {
+            foreach (var item in items)
+            {
+                _checkout.Scan(item);
+            }
+
+            Assert.AreEqual(expectedTotal, _checkout.GetTotalPrice());
+        }
 
 
+        [TestMethod()]
+        [DataRow(new[] { "A", "A", "A", "A", "B", "B", "B" }, 255)]
+        public void ScanMultiItems_WithSpecialAndNormalOffers_ExpectDiscountedTotal(string[] items, int expectedTotal)
+        {
+            foreach (var item in items)
+            {
+                _checkout.Scan(item);
+            }
 
-
-
+            Assert.AreEqual(expectedTotal, _checkout.GetTotalPrice());
+        }
     }
 }
